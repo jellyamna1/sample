@@ -1,0 +1,6 @@
+.DS_Store
+.logs/
+.evfevent/
+tools/jt400.jar
+*.class
+.env

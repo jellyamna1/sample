@@ -1,0 +1,9 @@
+{
+  "description": "AMNA1 - IBM i source (PUB400)",
+  "objlib": "AMNA1",
+  "curlib": "AMNA1",
+  "includePath": [],
+  "preUsrlibl": [],
+  "postUsrlibl": [],
+  "setIBMiEnvCmd": []
+}
