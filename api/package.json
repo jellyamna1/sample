@@ -1,0 +1,13 @@
+{
+  "name": "dki-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "REST API data nasabah Bank DKI (AMNA1/DKICUSP)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "idb-connector": "^1.2.0"
+  }
+}

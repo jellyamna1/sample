@@ -1,0 +1,115 @@
+     A*----------------------------------------------------------------------
+     A* DKICUSD  : Layar Maintenance Nasabah
+     A* Desc    : Bank DKI - list (subfile) + detail CRUD
+     A* Author  : jelly.amna
+     A* Date    : 22-10-2026
+     A*----------------------------------------------------------------------
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      INDARA
+     A                                      PRINT
+     A* Subfile: daftar nasabah
+     A          R DKISFL                    SFL
+     A            SFOPT          1A  B  8  3
+     A                                      DSPATR(UL)
+     A                                      VALUES(' ' '2' '4' '5')
+     A            SFID           7Y 0O  8  7
+     A                                      EDTCDE(Z)
+     A            SFNAM         30A  O  8 16
+     A            SFTLP         15A  O  8 48
+     A* Subfile control: header + opsi
+     A          R DKICTL                    SFLCTL(DKISFL)
+     A                                      SFLSIZ(9999)
+     A                                      SFLPAG(0012)
+     A                                      CA03(03 'Keluar')
+     A                                      CF05(05 'Refresh')
+     A                                      CF06(06 'Tambah')
+     A                                      OVERLAY
+     A  31                                  SFLDSP
+     A  32                                  SFLDSPCTL
+     A  33                                  SFLCLR
+     A  34                                  SFLEND(*MORE)
+     A                                  1  2'DKICUSD'
+     A                                      COLOR(BLU)
+     A                                  1 35'  BANK DKI  '
+     A                                      DSPATR(RI)
+     A                                      COLOR(WHT)
+     A                                  1 71DATE
+     A                                      EDTCDE(Y)
+     A                                      COLOR(BLU)
+     A                                  2 28'Aplikasi CRUD Data Nasabah'
+     A                                      COLOR(WHT)
+     A                                  2 71TIME
+     A                                      COLOR(BLU)
+     A                                  4  2'Ketik opsi, tekan Enter.'
+     A                                      COLOR(BLU)
+     A                                  5  4'2=Ubah   4=Hapus   5=Tampil'
+     A                                      COLOR(BLU)
+     A                                  7  2'Opt'
+     A                                      DSPATR(UL)
+     A                                      COLOR(WHT)
+     A                                  7  7'ID     '
+     A                                      DSPATR(UL)
+     A                                      COLOR(WHT)
+     A                                  7 16'Nama Nasabah                  '
+     A                                      DSPATR(UL)
+     A                                      COLOR(WHT)
+     A                                  7 48'No Telepon     '
+     A                                      DSPATR(UL)
+     A                                      COLOR(WHT)
+     A* Footer: function key + pesan
+     A          R DKIFTR
+     A                                      OVERLAY
+     A                                 22  2'F3=Keluar'
+     A                                      COLOR(BLU)
+     A                                 22 14'F5=Refresh'
+     A                                      COLOR(BLU)
+     A                                 22 27'F6=Tambah Nasabah'
+     A                                      COLOR(BLU)
+     A            FMSG          78A  O 23  2
+     A                                      COLOR(WHT)
+     A* Detail: tambah / ubah / tampil / hapus
+     A          R DKIDTL
+     A                                      CA03(03 'Keluar')
+     A                                      CA12(12 'Kembali')
+     A                                  1  2'DKICUSD'
+     A                                      COLOR(BLU)
+     A                                  1 35'  BANK DKI  '
+     A                                      DSPATR(RI)
+     A                                      COLOR(WHT)
+     A                                  1 71DATE
+     A                                      EDTCDE(Y)
+     A                                      COLOR(BLU)
+     A                                  2 28'Aplikasi CRUD Data Nasabah'
+     A                                      COLOR(WHT)
+     A                                  2 71TIME
+     A                                      COLOR(BLU)
+     A            DMODE         30A  O  4  2
+     A                                      DSPATR(HI)
+     A                                  6  3'ID Nasabah . . :'
+     A            DID            7Y 0O  6 20
+     A                                      EDTCDE(Z)
+     A                                  8  3'Nama . . . . . :'
+     A            DNAM          40A  B  8 20
+     A                                      CHECK(LC)
+     A  40                                  DSPATR(PR)
+     A N40                                  DSPATR(UL)
+     A  50                                  DSPATR(RI PC)
+     A                                 10  3'Alamat . . . . :'
+     A            DALM          60A  B 10 20
+     A                                      CHECK(LC)
+     A  40                                  DSPATR(PR)
+     A N40                                  DSPATR(UL)
+     A  51                                  DSPATR(RI PC)
+     A                                 12  3'No Telepon . . :'
+     A            DTLP          15A  B 12 20
+     A  40                                  DSPATR(PR)
+     A N40                                  DSPATR(UL)
+     A  52                                  DSPATR(RI PC)
+     A  41                             20  2'Tekan Enter untuk konfirmasi HAPUS'
+     A  41                                  COLOR(RED)
+     A  41                             20 37', F12 untuk batal.'
+     A  41                                  COLOR(RED)
+     A                                 22  2'F3=Keluar   F12=Kembali'
+     A                                      COLOR(BLU)
+     A            DMSG          78A  O 23  2
+     A                                      COLOR(RED)

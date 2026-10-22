@@ -1,0 +1,17 @@
+/* ----------------------------------------------------------------- */
+/* Program  : DKICUSC                                                */
+/* Desc     : Bank DKI - Entry point aplikasi data nasabah           */
+/*            Pasang library AMNA1 lalu panggil DKICUSR.             */
+/* Usage    : CALL AMNA1/DKICUSC                                     */
+/* ----------------------------------------------------------------- */
+/* Modification log                                                  */
+/* 22-10-2026  jelly.amna   Initial version                          */
+/* ----------------------------------------------------------------- */
+             PGM
+
+             ADDLIBLE   LIB(AMNA1)
+             MONMSG     MSGID(CPF2103) /* sudah ada di *LIBL */
+
+             CALL       PGM(AMNA1/DKICUSR)
+
+             ENDPGM

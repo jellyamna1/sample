@@ -1,0 +1,17 @@
+     A*----------------------------------------------------------------------
+     A* DKICUSP  : Master Data Nasabah
+     A* Desc    : Bank DKI - customer master, key CUSID
+     A* Author  : jelly.amna
+     A* Date    : 22-10-2026
+     A*----------------------------------------------------------------------
+     A                                      UNIQUE
+     A          R DKICUSF                   TEXT('DKI - Master Nasabah')
+     A            CUSID          7P 0       TEXT('ID Nasabah')
+     A                                      COLHDG('ID' 'Nasabah')
+     A            CUSNAM        40A         TEXT('Nama Nasabah')
+     A                                      COLHDG('Nama' 'Nasabah')
+     A            CUSALM        60A         TEXT('Alamat')
+     A                                      COLHDG('Alamat')
+     A            CUSTLP        15A         TEXT('No Telepon')
+     A                                      COLHDG('No' 'Telepon')
+     A          K CUSID

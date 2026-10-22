@@ -1,1 +1,2 @@
 HALLO.PGM: hallo.rpgle
+DKICUSR.PGM: dkicusr.rpgle DKICUSP.FILE DKICUSD.FILE

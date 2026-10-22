@@ -32,3 +32,34 @@ IBMI_PWD=... java -cp tools/jt400.jar tools/Sql.java 185.113.5.134 amna "SELECT 
 ssh ibmi
 cd ~/amna1 && git pull && makei build
 ```
+
+## Aplikasi Bank DKI - Data Nasabah (CRUD)
+| Object    | Tipe          | Source                     |
+|-----------|---------------|----------------------------|
+| `DKICUSP` | PF            | `qddssrc/dkicusp.pf`       |
+| `DKICUSD` | DSPF          | `qddssrc/dkicusd.dspf`     |
+| `DKICUSR` | PGM (RPGLE)   | `qrpglesrc/dkicusr.rpgle`  |
+| `DKICUSC` | PGM (CLLE)    | `qclsrc/dkicusc.clle`      |
+
+Deploy: `tools/deploy.sh qddssrc/dkicusp.pf qddssrc/dkicusd.dspf qrpglesrc/dkicusr.rpgle qclsrc/dkicusc.clle`
+
+Jalankan dari 5250: `CALL AMNA1/DKICUSC`
+- Layar list: ketik opsi `2`=Ubah, `4`=Hapus, `5`=Tampil di kolom Opt lalu Enter. F6=Tambah, F5=Refresh, F3=Keluar.
+- Layar detail: isi Nama, Alamat, No Telepon lalu Enter untuk simpan. F12=Kembali, F3=Keluar.
+- Hapus: layar detail tampil terkunci, tekan Enter untuk konfirmasi.
+
+## REST API Data Nasabah (`api/`)
+`GET http://185.113.5.134:3077/api/customers` → seluruh isi `AMNA1/DKICUSP` sebagai JSON (tanpa autentikasi).
+Node.js (PASE) + `idb-connector`. PUB400 menolak `SBMJOB` (routing data tidak cocok), jadi server dijalankan
+sebagai proses background lewat QSH.
+
+```sh
+set -a; eval "$(grep '^IBMI_' .env)"; set +a
+J="java -cp tools/jt400.jar tools/Cl.java $IBMI_HOST $IBMI_USER"
+# deploy + start (npm install otomatis saat pertama kali, log di /home/AMNA/amna1/api/server.log)
+java -cp tools/jt400.jar tools/Push.java $IBMI_HOST $IBMI_USER $IBMI_DIR api/server.js api/package.json api/start.sh
+$J "ADDENVVAR ENVVAR(QIBM_MULTI_THREADED) VALUE(Y) REPLACE(*YES)" \
+   "QSH CMD('nohup /QOpenSys/usr/bin/sh /home/AMNA/amna1/api/start.sh > /dev/null 2>&1 &')"
+# stop
+$J "QSH CMD('kill \$(ps -u AMNA -o pid,args | grep \"node server.js\" | grep -v grep | cut -c1-10)')"
+```
