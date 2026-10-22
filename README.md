@@ -14,6 +14,9 @@ Password dibaca dari env `IBMI_PWD`, jangan disimpan di repo. `jt400.jar` tidak 
 # Export ulang semua member source dari library ke repo
 IBMI_PWD=... java -cp tools/jt400.jar tools/Export.java 185.113.5.134 amna AMNA1 .
 
+# Kirim file ke server (IFS /home/AMNA/amna1), tanpa compile
+IBMI_PWD=... java -cp tools/jt400.jar tools/Push.java 185.113.5.134 amna /home/AMNA/amna1 $(git ls-files)
+
 # Jalankan query SQL
 IBMI_PWD=... java -cp tools/jt400.jar tools/Sql.java 185.113.5.134 amna "SELECT * FROM AMNA1.\"USER\""
 ```

@@ -9,7 +9,7 @@ public class Sql {
                     ResultSetMetaData md = rs.getMetaData(); int n = md.getColumnCount();
                     StringBuilder h = new StringBuilder("  "); for (int i = 1; i <= n; i++) h.append(i > 1 ? " | " : "").append(md.getColumnName(i)); System.out.println(h);
                     while (rs.next()) { StringBuilder sb = new StringBuilder("  ");
-                        for (int i = 1; i <= n; i++) sb.append(i > 1 ? " | " : "").append(String.valueOf(rs.getObject(i)).replaceAll("\\s+$", ""));
+                        for (int i = 1; i <= n; i++) sb.append(i > 1 ? " | " : "").append(String.valueOf(rs.getString(i)).replaceAll("\\s+$", ""));
                         System.out.println(sb); }
                 } catch (SQLException e) { System.out.println("  ERR " + e.getMessage()); }
             }
