@@ -4,3 +4,4 @@
 tools/jt400.jar
 *.class
 .env
+._*
