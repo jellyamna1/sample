@@ -17,7 +17,8 @@ IBMI_PWD=... java -cp tools/jt400.jar tools/Export.java 185.113.5.134 amna AMNA1
 # Kirim file ke server (IFS /home/AMNA/amna1), tanpa compile
 IBMI_PWD=... java -cp tools/jt400.jar tools/Push.java 185.113.5.134 amna /home/AMNA/amna1 $(git ls-files)
 
-# Push + compile (*.rpgle, *.sqlrpgle, *.clle) — kredensial dari .env (IBMI_HOST/USER/PWD/LIB/DIR)
+# Push + compile (*.pf, *.dspf, *.rpgle, *.sqlrpgle, *.clle) — source disalin ke member (folder = source file,
+# mis. qrpglesrc/x.rpgle -> AMNA1/QRPGLESRC(X)) lalu compile dari member. Kredensial dari .env
 tools/deploy.sh qrpglesrc/hallo.rpgle
 
 # Jalankan CL command

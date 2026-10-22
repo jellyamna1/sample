@@ -1,0 +1,10 @@
+     A*----------------------------------------------------------------------
+     A* DKICUSL1 : Nasabah by No Telepon
+     A* Desc    : Bank DKI - logical file atas DKICUSP, key CUSTLP
+     A*           dipakai DKICUSR untuk cek no telepon ganda
+     A* Author  : jelly.amna
+     A* Date    : 22-10-2026
+     A*----------------------------------------------------------------------
+     A          R DKICUSF                   PFILE(DKICUSP)
+     A          K CUSTLP
+     A          K CUSID

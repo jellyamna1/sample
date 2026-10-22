@@ -5,6 +5,7 @@
 //            List nasabah di subfile, opsi 2=Ubah 4=Hapus 5=Tampil,
 //            F6=Tambah. Data disimpan di PF DKICUSP.
 // Files    : DKICUSP  (PF)   - master nasabah, key CUSID
+//            DKICUSL1 (LF)   - nasabah by no telepon (cek duplikat)
 //            DKICUSD  (DSPF) - layar list + detail
 // Called by: DKICUSC (CL)
 // ---------------------------------------------------------------------
@@ -12,6 +13,8 @@
 // Date        Author       Description
 // ----------  -----------  ---------------------------------------------
 // 22-10-2026  jelly.amna   Initial version
+// 22-10-2026  jelly.amna   Validasi no telepon: minimal 10 digit dan
+//                          tidak boleh sama dengan nasabah lain
 // ---------------------------------------------------------------------
 ctl-opt dftactgrp(*no) actgrp(*new)
         option(*srcstmt:*nodebugio)
@@ -21,6 +24,7 @@ ctl-opt dftactgrp(*no) actgrp(*new)
 // Files
 // ---------------------------------------------------------------------
 dcl-f DKICUSP usage(*update:*delete:*output) keyed;
+dcl-f DKICUSL1 usage(*input) keyed rename(DKICUSF:DKICUSL1R) prefix(L1_);
 dcl-f DKICUSD workstn sfile(DKISFL:wRrn) indds(dspInd);
 
 // ---------------------------------------------------------------------
@@ -59,6 +63,8 @@ dcl-c ST_LOCKED    01218;
 dcl-c MAX_RETRY    3;
 dcl-c SFL_MAX      9999;
 dcl-c TLP_CHARS    '0123456789+-() ';
+dcl-c DIGITS       '0123456789';
+dcl-c TLP_MIN_DIGIT 10;
 
 // ---------------------------------------------------------------------
 // Work fields
@@ -212,7 +218,7 @@ dcl-proc showDetail;
       iter;
     endif;
 
-    if not validInput();
+    if not validInput(pId);
       iter;
     endif;
 
@@ -228,14 +234,21 @@ dcl-proc showDetail;
 end-proc;
 
 // ---------------------------------------------------------------------
-// validInput - validasi field layar detail, set indikator error
+// validInput - validasi field layar detail, set indikator error.
+//              pId = ID nasabah yang sedang diubah (0 = tambah baru)
 // ---------------------------------------------------------------------
 dcl-proc validInput;
-  dcl-pi *n ind end-pi;
+  dcl-pi *n ind;
+    pId  packed(7:0) const;
+  end-pi;
+
+  dcl-s tlpMsg varchar(78);
+
+  tlpMsg = checkPhone(pId);
 
   dspInd.errNama   = (DNAM = *blanks);
   dspInd.errAlamat = (DALM = *blanks);
-  dspInd.errTlp    = (DTLP = *blanks or %check(TLP_CHARS : DTLP) > 0);
+  dspInd.errTlp    = (tlpMsg <> '');
 
   select;
     when dspInd.errNama;
@@ -243,10 +256,82 @@ dcl-proc validInput;
     when dspInd.errAlamat;
       DMSG = 'Alamat wajib diisi.';
     when dspInd.errTlp;
-      DMSG = 'No telepon wajib diisi, hanya angka dan + - ( ).';
+      DMSG = tlpMsg;
   endsl;
 
   return not (dspInd.errNama or dspInd.errAlamat or dspInd.errTlp);
+
+end-proc;
+
+// ---------------------------------------------------------------------
+// checkPhone - validasi no telepon, kembalikan pesan error
+//              (kosong = valid)
+// ---------------------------------------------------------------------
+dcl-proc checkPhone;
+  dcl-pi *n varchar(78);
+    pId  packed(7:0) const;
+  end-pi;
+
+  dcl-s ownerId packed(7:0);
+
+  if DTLP = *blanks or %check(TLP_CHARS : DTLP) > 0;
+    return 'No telepon wajib diisi, hanya angka dan + - ( ).';
+  endif;
+
+  if countDigits(DTLP) < TLP_MIN_DIGIT;
+    return 'No telepon minimal ' + %char(TLP_MIN_DIGIT) + ' digit angka.';
+  endif;
+
+  ownerId = phoneOwner(DTLP : pId);
+  if ownerId <> 0;
+    return 'No telepon sudah dipakai nasabah ID ' + %char(ownerId) + '.';
+  endif;
+
+  return '';
+
+end-proc;
+
+// ---------------------------------------------------------------------
+// countDigits - jumlah karakter angka 0-9 di sebuah string
+// ---------------------------------------------------------------------
+dcl-proc countDigits;
+  dcl-pi *n int(10);
+    pValue varchar(15) const;
+  end-pi;
+
+  dcl-s i     int(10);
+  dcl-s count int(10);
+
+  for i = 1 to %len(pValue);
+    if %scan(%subst(pValue : i : 1) : DIGITS) > 0;
+      count += 1;
+    endif;
+  endfor;
+
+  return count;
+
+end-proc;
+
+// ---------------------------------------------------------------------
+// phoneOwner - ID nasabah lain yang sudah memakai no telepon ini
+//              (0 = belum dipakai). pExclId = ID yang diabaikan.
+// ---------------------------------------------------------------------
+dcl-proc phoneOwner;
+  dcl-pi *n packed(7:0);
+    pTlp     char(15)    const;
+    pExclId  packed(7:0) const;
+  end-pi;
+
+  setll pTlp DKICUSL1;
+  reade pTlp DKICUSL1;
+  dow not %eof(DKICUSL1);
+    if L1_CUSID <> pExclId;
+      return L1_CUSID;
+    endif;
+    reade pTlp DKICUSL1;
+  enddo;
+
+  return 0;
 
 end-proc;
 

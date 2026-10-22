@@ -10,10 +10,9 @@ clear subfile (SFLCLR)
 SETLL *LOVAL, READ(N) DKICUSP urut CUSID
 WRITE DKISFL per record;
 
-repeat
-  :WRITE DKIFTR
-  EXFMT DKICTL;
+repeat :WRITE DKIFTR\nEXFMT DKICTL;
   if (F3 = Keluar?) then (ya)
+    :Keluar dari loop;
   elseif (F5 = Refresh?) then (ya)
     :loadSubfile();
   elseif (F6 = Tambah?) then (ya)

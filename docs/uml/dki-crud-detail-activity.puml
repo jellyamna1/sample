@@ -17,8 +17,7 @@ endif
 :protect (40) = TAMPIL atau HAPUS
 confirmDel (41) = HAPUS;
 
-repeat
-  :EXFMT DKIDTL;
+repeat :EXFMT DKIDTL;
   if (F3 / F12 / mode TAMPIL?) then (ya)
     break
   endif
@@ -31,9 +30,15 @@ repeat
       (atau FMSG "sudah tidak ada");
       break
     endif
-  elseif (validInput()?) then (tidak)
+  elseif (validInput(id)?) then (tidak)
     :Set indikator 50/51/52 (RI + PC)
     DMSG = pesan error pertama;
+    note right
+      Nama & Alamat wajib diisi
+      checkPhone(): No Telepon wajib, hanya 0-9 + - ( ),
+      minimal 10 digit (countDigits),
+      belum dipakai nasabah lain (phoneOwner via LF DKICUSL1)
+    end note
   elseif (mode TAMBAH?) then (ya)
     :addCustomer()
     CUSID = nextId() (SETGT *HIVAL, READP(N))
