@@ -17,6 +17,12 @@ IBMI_PWD=... java -cp tools/jt400.jar tools/Export.java 185.113.5.134 amna AMNA1
 # Kirim file ke server (IFS /home/AMNA/amna1), tanpa compile
 IBMI_PWD=... java -cp tools/jt400.jar tools/Push.java 185.113.5.134 amna /home/AMNA/amna1 $(git ls-files)
 
+# Push + compile (*.rpgle, *.sqlrpgle, *.clle) — kredensial dari .env (IBMI_HOST/USER/PWD/LIB/DIR)
+tools/deploy.sh qrpglesrc/hallo.rpgle
+
+# Jalankan CL command
+IBMI_PWD=... java -cp tools/jt400.jar tools/Cl.java 185.113.5.134 amna "CALL AMNA1/HALLO"
+
 # Jalankan query SQL
 IBMI_PWD=... java -cp tools/jt400.jar tools/Sql.java 185.113.5.134 amna "SELECT * FROM AMNA1.\"USER\""
 ```
