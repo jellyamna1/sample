@@ -1,0 +1,55 @@
+@startuml dki-crud-sequence
+title CRUD Nasabah (5250) - Interaksi Antar Object
+
+actor "User 5250" as user
+participant "DKICUSC\n(CLLE)" as cl
+participant "DKICUSR\n(RPGLE)" as rpg
+boundary "DKICUSD\n(DSPF)" as dspf
+database "DKICUSP\n(PF)" as pf
+
+user -> cl : CALL AMNA1/DKICUSC
+cl -> cl : ADDLIBLE AMNA1\nMONMSG CPF2103
+cl -> rpg : CALL AMNA1/DKICUSR
+rpg -> pf : loadSubfile(): SETLL *LOVAL, READ(N)
+rpg -> dspf : WRITE DKISFL (per record)
+
+loop sampai F3 = Keluar
+  rpg -> dspf : WRITE DKIFTR, EXFMT DKICTL
+  dspf -> user : layar daftar nasabah
+  user -> dspf : opsi di kolom Opt / function key
+  dspf --> rpg : input + indikator (INDDS)
+
+  alt F6 = Tambah
+    rpg -> dspf : EXFMT DKIDTL "TAMBAH NASABAH"
+    user -> dspf : isi Nama, Alamat, No Telepon
+    rpg -> rpg : validInput()
+    rpg -> pf : nextId(): SETGT *HIVAL, READP(N)
+    rpg -> pf : WRITE(E) DKICUSF\n(retry max 3x bila duplicate key 01021)
+  else opsi 2 = Ubah
+    rpg -> pf : CHAIN(N) CUSID
+    rpg -> dspf : EXFMT DKIDTL "UBAH NASABAH"
+    user -> dspf : ubah Nama, Alamat, No Telepon
+    rpg -> rpg : validInput()
+    rpg -> pf : CHAIN(E) CUSID (lock record)
+    rpg -> pf : UPDATE DKICUSF %FIELDS(CUSNAM:CUSALM:CUSTLP)
+  else opsi 4 = Hapus
+    rpg -> pf : CHAIN(N) CUSID
+    rpg -> dspf : EXFMT DKIDTL "HAPUS NASABAH" (field protect)
+    user -> dspf : Enter = konfirmasi hapus
+    rpg -> pf : CHAIN(E) CUSID (lock record)
+    rpg -> pf : DELETE DKICUSF
+  else opsi 5 = Tampil
+    rpg -> pf : CHAIN(N) CUSID
+    rpg -> dspf : EXFMT DKIDTL "TAMPIL NASABAH" (field protect)
+  else F5 = Refresh
+    rpg -> rpg : (tidak ada aksi detail)
+  end
+
+  rpg -> pf : loadSubfile(): baca ulang DKICUSP
+  rpg -> dspf : WRITE DKISFL (per record)
+end
+
+rpg -> rpg : *INLR = *ON
+rpg --> cl : return
+cl --> user : kembali ke command line
+@enduml

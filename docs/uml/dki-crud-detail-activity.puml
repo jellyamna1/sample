@@ -1,0 +1,61 @@
+@startuml dki-crud-detail-activity
+title DKICUSR - showDetail(mode, id): Tambah / Ubah / Tampil / Hapus
+
+start
+:Kosongkan DID, DNAM, DALM, DTLP, DMSG
+Reset indikator error 50/51/52;
+if (mode <> TAMBAH?) then (ya)
+  :CHAIN(N) id DKICUSP;
+  if (record ditemukan?) then (tidak)
+    :FMSG = "Nasabah <id> tidak ditemukan.";
+    stop
+  else (ya)
+    :Isi field layar dari DKICUSP;
+  endif
+else (tidak)
+endif
+:protect (40) = TAMPIL atau HAPUS
+confirmDel (41) = HAPUS;
+
+repeat
+  :EXFMT DKIDTL;
+  if (F3 / F12 / mode TAMPIL?) then (ya)
+    break
+  endif
+  if (mode HAPUS?) then (ya)
+    :deleteCustomer(): CHAIN(E) id DKICUSP;
+    if (error / record terkunci?) then (ya)
+      :DMSG = lockMessage();
+    else (tidak)
+      :DELETE DKICUSF
+      (atau FMSG "sudah tidak ada");
+      break
+    endif
+  elseif (validInput()?) then (tidak)
+    :Set indikator 50/51/52 (RI + PC)
+    DMSG = pesan error pertama;
+  elseif (mode TAMBAH?) then (ya)
+    :addCustomer()
+    CUSID = nextId() (SETGT *HIVAL, READP(N))
+    WRITE(E) DKICUSF, retry max 3x bila 01021;
+    if (berhasil?) then (ya)
+      :FMSG = "Nasabah <id> berhasil ditambahkan.";
+      break
+    else (tidak)
+      :DMSG = "Gagal menyimpan nasabah";
+    endif
+  else (UBAH)
+    :updateCustomer(): CHAIN(E) id DKICUSP;
+    if (error / record terkunci (01218)?) then (ya)
+      :DMSG = lockMessage();
+    else (tidak)
+      :UPDATE DKICUSF %FIELDS(CUSNAM:CUSALM:CUSTLP)
+      (atau FMSG "sudah tidak ada");
+      break
+    endif
+  endif
+repeat while (tampilkan ulang layar detail)
+
+:Kembali ke layar daftar;
+stop
+@enduml

@@ -1,0 +1,30 @@
+@startuml dki-rest-api-sequence
+title REST API Data Nasabah - GET /api/customers
+
+autonumber
+actor "Aplikasi lain\n(consumer)" as client
+participant "server.js\n(Node.js 18, port 3077)" as api
+participant "idb-connector\n(DB2 for i driver)" as idb
+database "AMNA1/DKICUSP\n(PF)" as pf
+
+client -> api : GET http://185.113.5.134:3077/api/customers\n(tanpa body, tanpa autentikasi)
+
+alt method bukan GET atau path bukan /api/customers
+  api --> client : 404 {"error":"Not found"}
+else
+  api -> idb : new dbconn().conn('*LOCAL')
+  api -> idb : dbstmt.exec(SQL_CUSTOMERS)
+  idb -> pf : SELECT CUSID, TRIM(CUSNAM), TRIM(CUSALM), TRIM(CUSTLP)\nFROM AMNA1.DKICUSP ORDER BY CUSID
+  pf --> idb : result set
+  idb --> api : rows (CUSID sebagai string)
+  api -> idb : stmt.close(), conn.disconn(), conn.close()
+
+  alt query sukses
+    api -> api : id = Number(id)
+    api --> client : 200 application/json\n[{"id":1,"nama":"...","alamat":"...","telepon":"..."}]
+  else error SQL
+    api -> api : console.error -> server.log
+    api --> client : 500 {"error":"Gagal membaca data nasabah"}
+  end
+end
+@enduml

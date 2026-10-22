@@ -1,0 +1,33 @@
+@startuml dki-arsitektur
+title Bank DKI - Arsitektur CRUD Nasabah & REST API\n(library AMNA1 @ PUB400 185.113.5.134)
+
+actor "User 5250" as user
+actor "Aplikasi lain\n(consumer)" as client
+
+node "IBM i - PUB400" {
+  package "Library AMNA1" {
+    component "DKICUSC\n(CLLE - entry point)" as cl
+    component "DKICUSR\n(RPGLE - logika CRUD)" as rpg
+    component "DKICUSD\n(DSPF - layar)" as dspf
+    database "DKICUSP\n(PF - master nasabah)\nkey CUSID UNIQUE" as pf
+  }
+  package "IFS /home/AMNA/amna1/api (PASE)" {
+    component "server.js\n(Node.js 18 + idb-connector)\nport 3077" as api
+  }
+}
+
+user --> cl : CALL AMNA1/DKICUSC
+cl --> rpg : ADDLIBLE AMNA1\nCALL DKICUSR
+rpg --> dspf : EXFMT DKICTL / DKIDTL\nWRITE DKISFL / DKIFTR
+rpg --> pf : READ(N) / CHAIN\nWRITE / UPDATE / DELETE
+client --> api : HTTP GET /api/customers
+api --> pf : SELECT ... ORDER BY CUSID
+
+note bottom of pf
+  Record format DKICUSF
+  CUSID   7P 0  ID Nasabah (key)
+  CUSNAM  40A   Nama Nasabah
+  CUSALM  60A   Alamat
+  CUSTLP  15A   No Telepon
+end note
+@enduml

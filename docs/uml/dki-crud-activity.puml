@@ -1,0 +1,36 @@
+@startuml dki-crud-activity
+title DKICUSR - Alur Layar Daftar Nasabah (mainline)
+
+start
+:CALL AMNA1/DKICUSC;
+:ADDLIBLE AMNA1 (MONMSG CPF2103);
+:CALL DKICUSR;
+:loadSubfile()
+clear subfile (SFLCLR)
+SETLL *LOVAL, READ(N) DKICUSP urut CUSID
+WRITE DKISFL per record;
+
+repeat
+  :WRITE DKIFTR
+  EXFMT DKICTL;
+  if (F3 = Keluar?) then (ya)
+  elseif (F5 = Refresh?) then (ya)
+    :loadSubfile();
+  elseif (F6 = Tambah?) then (ya)
+    :showDetail(MODE_ADD);
+    :loadSubfile();
+  else (Enter)
+    :processOptions()
+    READC DKISFL;
+    note right
+      2 = Ubah   -> showDetail(MODE_CHG)
+      4 = Hapus  -> showDetail(MODE_DLT)
+      5 = Tampil -> showDetail(MODE_DSP)
+    end note
+    :loadSubfile();
+  endif
+repeat while (F3 ditekan?) is (tidak) not (ya)
+
+:*INLR = *ON;
+stop
+@enduml
